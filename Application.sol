@@ -15,10 +15,18 @@ contract Application {
         uint nic;
     }
     
+//  if(_status == 1) { status = Status.Submitted; return; }
+//  if(_status == 2) { status = Status.Valid; return; }
+//  if(_status == 3) { status = Status.Running; return; }
+//  if(_status == 4) { status = Status.Decommissioned; return; }
+//  if(_status == 5) { status = Status.Deployed; return; }
+//  if(_status == 6) { status = Status.Approved; return; }
+//  if(_status == 7) { status = Status.Rejected; return; }    
     enum Status {Submitted, Valid, Running, Decommissioned, Deployed, Approved, Rejected}
     enum TShirtSize { Small, Medium, Large}
 
     address requestor;
+    string requesterName;
     mapping (uint => string) requiredRoles;
     mapping (uint => string) approvedRoles;
     mapping (uint => Approver) approvers;
@@ -27,17 +35,10 @@ contract Application {
     uint numApprovedRoles;
     Specification applicationSpecs;
     string applicationName;
-    /*  status = 1 == Submitted
-        status = 2 == Valid
-        status = 3 == Running
-        status = 4 == Decommissioned
-        status = 5 == Deployed
-        status = 6 == Approved
-        status = 7 == Rejected
+    string createdDate;
+    string deployedDate;
+    uint status;
 
-    */
-    uint status; 
-    
     event ApplicationCreated(address indexed requestor, uint indexed numReqApprovers);
     event WrongApplicationSize(uint indexed _size);
     event Killed(address indexed owner);
@@ -51,13 +52,16 @@ contract Application {
     event ApproverAdded(uint indexed numApprovers, string indexed _name, string indexed _role, string _date);
     event ApplicationApproved();
     
-    function Application(address _requestor, uint _size, string _name) {
+    function Application(address _requestor, uint _size, string _name, string _requesterName, string _date) {
         requestor = _requestor;
+        requesterName = _requesterName;
         numApprovers = 0;
         numApprovedRoles = 0;
         applicationName = _name;
         numReqRoles = 0;
         status = 1;
+        createdDate = _date;
+        deployedDate = "N/A";
         if(_size == 1) { applicationSpecs.cpu = 1; applicationSpecs.ram = 4; applicationSpecs.capacity = 1024; applicationSpecs.nic = 1; }
         else if (_size == 2) { applicationSpecs.cpu = 2; applicationSpecs.ram = 8; applicationSpecs.capacity = 2048; applicationSpecs.nic = 2; }
         else if(_size == 3) { applicationSpecs.cpu = 4; applicationSpecs.ram = 16; applicationSpecs.capacity = 4096; applicationSpecs.nic = 4; }
@@ -66,7 +70,7 @@ contract Application {
             }
         ApplicationCreated(requestor, numReqRoles);
     }
-
+    
     function addRequiredRole(string _role) {
         AddingRequiredRole(_role);
         requiredRoles[numReqRoles] = _role;
@@ -84,9 +88,10 @@ contract Application {
     }
     
     function getApprovalsStatus() constant returns(uint, uint, uint) {
-        return(uint(status), numReqRoles, numApprovedRoles);
+        return(status, numReqRoles, numApprovedRoles);
     }
-
+    
+    //Should work!!! To be tested!!!
     function approve(string _name, string _role, string _date) {
         uint i;
         uint roleRequired;
@@ -145,20 +150,32 @@ contract Application {
         return(applicationName);
     }
     
+    function getRequesterName() constant returns(string) {
+        return(requesterName);
+    }
+    
     function getSpecification() constant returns(uint, uint, uint, uint) {
         return(applicationSpecs.cpu, applicationSpecs.ram, applicationSpecs.capacity, applicationSpecs.nic);
     }
     
     function getStatus() constant returns(uint) {
-        return(uint(status));
+        return(status);
     }
     
-    event CalledChangeStatus(uint indexed _status);
-    event StatusChanged(uint indexed _status);
+     function getCreatedDate() constant returns(string) {
+        return(createdDate);
+    }
+    
+    
+    function setDeployedDate(string _date)  {
+        deployedDate = _date;
+    }
+    
+    function getDeployedDate() constant returns(string) {
+        return(deployedDate);
+    }
     function changeStatus(uint _status) {
-        CalledChangeStatus(_status);
         status = _status;
-        StatusChanged(status);
     }
     
     
