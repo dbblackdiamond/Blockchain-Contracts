@@ -86,12 +86,14 @@ contract Security {
     uint numberOfLeases;
     uint numberOfOwners;
     bool completed;
+    uint rating;
     
     function Security(string _name) {
         name = _name;
         completed = false;
         numberOfLeases = 0;
         numberOfOwners = 0;
+        rating = 0;
     }
     
     function getName() constant returns(string) {
